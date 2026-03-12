@@ -12,7 +12,7 @@ A private, self-hosted AI knowledge agent that lets you **upload PDFs**, **embed
 | Vector store | ChromaDB (local, persistent) |
 | Agent orchestration | LangGraph (scaffold) |
 | Local LLM | Ollama (scaffold) |
-| Frontend | React + Vite + TypeScript |
+| Frontend | React + Vite + TypeScript + Axios |
 
 ## Repository Layout
 
@@ -25,7 +25,7 @@ backend/         FastAPI app — routes, schemas, services, config
     services/    agent_service, rag_service, ollama_client
   main.py        compatibility entrypoint (supports `uvicorn main:app`)
   run.py         convenience dev launcher (watches all source dirs)
-frontend/        React UI scaffold
+frontend/        React UI — IngestPanel (PDF upload) + ChatPanel (Q&A)
 ingestion/       PDF loader (PyPDF2) + text chunker
 rag_pipeline/    Chroma similarity search + result normalisation
 vector_db/       ChromaDB client + store_embeddings helper
@@ -59,13 +59,18 @@ uvicorn main:app --reload
 
 API docs available at: `http://127.0.0.1:8000/docs`
 
-### 4. Run the frontend (optional)
+### 4. Run the frontend
 
 ```bash
 cd frontend
 npm install
-npm run dev
+npm start        # alias for `npm run dev`, starts at http://localhost:5173
 ```
+
+The frontend wires directly to the backend at `http://127.0.0.1:8000`:
+
+- **IngestPanel** — file picker + `POST /upload_pdf`, displays chunks stored
+- **ChatPanel** — message input ready for `POST /ask_question` wiring
 
 ## Key Endpoints
 

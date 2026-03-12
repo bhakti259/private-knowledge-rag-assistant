@@ -1,69 +1,51 @@
-// Ingestion feature component to submit text snippets as documents.
-import { FormEvent, useState } from "react";
+// src/components/ingestPanel.tsx
+import React, { useState, ChangeEvent } from "react";
+import API from "../api/client";
 
-import { submitIngestion } from "../api/client";
-
-interface IngestPanelProps {
-  apiBaseUrl: string;
+interface UploadResponse {
+  filename: string;
+  num_chunks: number;
+  chunks_preview?: string[];
 }
 
-export function IngestPanel({ apiBaseUrl }: IngestPanelProps) {
-  const [rawText, setRawText] = useState("");
-  const [status, setStatus] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const IngestPanel: React.FC = () => {
+  const [file, setFile] = useState<File | null>(null);
+  const [response, setResponse] = useState<UploadResponse | null>(null);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const lines = rawText
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
-
-    if (!lines.length) {
-      setError("Add at least one line of text to ingest.");
-      return;
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
     }
+  };
 
-    setError(null);
-    setStatus(null);
-    setIsSubmitting(true);
+  const handleUpload = async () => {
+    if (!file) return alert("Please select a file");
+    const formData = new FormData();
+    formData.append("file", file);
 
     try {
-      const documents = lines.map((line, index) => ({
-        id: `manual-${index + 1}`,
-        text: line,
-        metadata: { source: "frontend-manual-input" }
-      }));
-
-      const response = await submitIngestion(apiBaseUrl, { documents });
-      setStatus(
-        `${response.status} (${response.documents_received} document(s) received)`
-      );
+      const res = await API.post<UploadResponse>("/upload_pdf", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setResponse(res.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown ingestion error");
-    } finally {
-      setIsSubmitting(false);
+      console.error(err);
+      alert("Upload failed");
     }
   };
 
   return (
-    <section className="card">
-      <h2>Ingest Content</h2>
-      <form onSubmit={handleSubmit} className="stack">
-        <textarea
-          rows={8}
-          value={rawText}
-          onChange={(event) => setRawText(event.target.value)}
-          placeholder="Enter one document per line"
-        />
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : "Submit Documents"}
-        </button>
-      </form>
-
-      {error ? <p className="error">{error}</p> : null}
-      {status ? <p className="success">{status}</p> : null}
-    </section>
+    <div>
+      <input type="file" accept="application/pdf" onChange={handleFileChange} />
+      <button onClick={handleUpload}>Upload PDF</button>
+      {response && (
+        <div>
+          <h3>Upload Result:</h3>
+          <pre>{JSON.stringify(response, null, 2)}</pre>
+        </div>
+      )}
+    </div>
   );
-}
+};
+
+export default IngestPanel;
