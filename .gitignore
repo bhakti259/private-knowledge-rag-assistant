@@ -1,0 +1,32 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+venv/
+.venv/
+backend/venv/
+
+# Frontend artifacts
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+
+# Local environment files
+.env
+!.env.example
+
+# Local vector store persistence (keep placeholder directory only)
+vector_db/chroma_store/*
+!vector_db/chroma_store/.gitkeep
+
+# Editor / OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,35 @@
+# FastAPI web framework for building backend APIs.
+fastapi>=0.115.0
+
+# ASGI server used to run FastAPI locally and in deployment.
+uvicorn[standard]>=0.30.0
+
+# Core data validation and parsing for request/response schemas.
+pydantic>=2.8.0
+
+# Settings management for loading typed config from environment variables.
+pydantic-settings>=2.4.0
+
+# Optional .env loader for local development convenience.
+python-dotenv>=1.0.1
+
+# Required for handling multipart/form-data (file uploads in ingestion endpoints).
+python-multipart>=0.0.9
+
+# Core LangChain abstractions for prompts, chains, and retrieval orchestration.
+langchain>=0.2.0
+
+# LangGraph runtime for stateful, multi-step agent workflows.
+langgraph>=0.2.0
+
+# Chroma DB client for local vector storage and similarity search.
+chromadb>=0.5.0
+
+# Ollama client for local LLM inference.
+ollama>=0.3.0
+
+# Official OpenAI Python SDK (used for hosted embedding/model integrations).
+openai>=1.40.0
+
+# LangChain integration package for OpenAI embeddings/chat models.
+langchain-openai>=0.1.0
