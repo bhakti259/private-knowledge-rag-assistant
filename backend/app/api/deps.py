@@ -3,6 +3,8 @@
 Each dependency is isolated so services can be swapped or mocked in tests.
 """
 
+from fastapi import Depends
+
 from app.services.agent_service import AgentService
 from app.services.ollama_client import OllamaClient
 from app.services.rag_service import RagService
@@ -19,8 +21,8 @@ def get_rag_service() -> RagService:
 
 
 def get_agent_service(
-    ollama_client: OllamaClient | None = None,
-    rag_service: RagService | None = None,
+    ollama_client: OllamaClient = Depends(get_ollama_client),
+    rag_service: RagService = Depends(get_rag_service),
 ) -> AgentService:
     """Provide orchestration service that coordinates agents + RAG + LLM.
 
@@ -28,6 +30,6 @@ def get_agent_service(
         FastAPI dependency overrides can replace these defaults in tests.
     """
     return AgentService(
-        ollama_client=ollama_client or get_ollama_client(),
-        rag_service=rag_service or get_rag_service(),
+        ollama_client=ollama_client,
+        rag_service=rag_service,
     )

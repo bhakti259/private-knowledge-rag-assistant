@@ -3,7 +3,13 @@
 Centralized settings keep config concerns separate from business logic.
 """
 
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+ROOT_ENV_FILE = REPO_ROOT / ".env"
 
 
 class Settings(BaseSettings):
@@ -13,6 +19,9 @@ class Settings(BaseSettings):
     ollama_model: str = "llama3.1:8b"
     embedding_model: str = "nomic-embed-text"
 
+    # OpenAI API key used for embeddings (text-embedding-3-small).
+    openai_api_key: str = ""
+
     chroma_persist_dir: str = "./vector_db/chroma_store"
     chroma_collection: str = "private_knowledge_base"
 
@@ -21,7 +30,9 @@ class Settings(BaseSettings):
     frontend_origin: str = "http://localhost:5173"
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        # Always load the repo-root `.env`, even when the server is started
+        # from `backend/`.
+        env_file=str(ROOT_ENV_FILE),
         env_file_encoding="utf-8",
         extra="ignore",
     )

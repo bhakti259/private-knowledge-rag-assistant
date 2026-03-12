@@ -10,26 +10,32 @@ pydantic>=2.8.0
 # Settings management for loading typed config from environment variables.
 pydantic-settings>=2.4.0
 
-# Optional .env loader for local development convenience.
+# Loads .env files into environment at startup.
 python-dotenv>=1.0.1
 
-# Required for handling multipart/form-data (file uploads in ingestion endpoints).
+# Required for handling multipart/form-data (file uploads in FastAPI).
 python-multipart>=0.0.9
 
-# Core LangChain abstractions for prompts, chains, and retrieval orchestration.
-langchain>=0.2.0
+# PDF text extraction used in the /upload_pdf ingestion pipeline.
+PyPDF2>=3.0.0
+
+# Core LangChain abstractions: prompts, chains, retrievers.
+langchain>=1.0.0
 
 # LangGraph runtime for stateful, multi-step agent workflows.
-langgraph>=0.2.0
+langgraph>=1.0.0
 
-# Chroma DB client for local vector storage and similarity search.
-chromadb>=0.5.0
+# Chroma DB client — local persistent vector store.
+chromadb>=1.3.5
 
-# Ollama client for local LLM inference.
+# Ollama client for local LLM inference (used by chat scaffold).
 ollama>=0.3.0
 
-# Official OpenAI Python SDK (used for hosted embedding/model integrations).
-openai>=1.40.0
+# OpenAI Python SDK — used for embeddings (text-embedding-3-small).
+openai>=2.0.0
 
-# LangChain integration package for OpenAI embeddings/chat models.
-langchain-openai>=0.1.0
+# LangChain ↔ OpenAI integration (embeddings + chat models).
+langchain-openai>=1.0.0
+
+# LangChain ↔ Chroma integration for vector store operations.
+langchain-chroma>=1.0.0

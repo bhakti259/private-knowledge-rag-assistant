@@ -1,1 +1,1 @@
-"""Route registration package for health, chat, and ingestion endpoints."""
+"""Route registration package for health, chat, ingestion, and upload endpoints."""
