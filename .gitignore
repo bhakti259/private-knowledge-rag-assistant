@@ -27,6 +27,10 @@ frontend/dist/
 vector_db/chroma_store/*
 !vector_db/chroma_store/.gitkeep
 
+# Backend runtime directories — uploaded files and embedded vector store
+backend/uploads/
+backend/vector_db/
+
 # Editor / OS
 .DS_Store
 Thumbs.db
