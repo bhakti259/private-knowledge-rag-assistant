@@ -1,6 +1,6 @@
 # Private AI Knowledge Agent
 
-A private, self-hosted AI knowledge agent that lets you **upload PDFs**, **embed them into a local vector store**, and **query them** using OpenAI embeddings and ChromaDB — with a FastAPI backend and a React frontend.
+A private, self-hosted AI knowledge agent that lets you **upload PDFs**, **embed them into a local vector store**, and **ask natural-language questions** — powered by OpenAI embeddings, ChromaDB retrieval, and GPT-4o-mini answer generation. Built with a FastAPI backend and a React frontend.
 
 ## Stack
 
@@ -9,6 +9,7 @@ A private, self-hosted AI knowledge agent that lets you **upload PDFs**, **embed
 | Backend API | FastAPI + Uvicorn |
 | PDF ingestion | PyPDF2 |
 | Embeddings | OpenAI `text-embedding-3-small` |
+| Answer Generation | OpenAI `gpt-4o-mini` via LangChain |
 | Vector store | ChromaDB (local, persistent) |
 | Agent orchestration | LangGraph (scaffold) |
 | Local LLM | Ollama (scaffold) |
@@ -27,7 +28,7 @@ backend/         FastAPI app — routes, schemas, services, config
   run.py         convenience dev launcher (watches all source dirs)
 frontend/        React UI — IngestPanel (PDF upload) + ChatPanel (Q&A)
 ingestion/       PDF loader (PyPDF2) + text chunker
-rag_pipeline/    Chroma similarity search + result normalisation
+rag_pipeline/    Retriever, prompt builder, answer generation (GPT-4o-mini)
 vector_db/       ChromaDB client + store_embeddings helper
 ```
 
@@ -70,7 +71,7 @@ npm start        # alias for `npm run dev`, starts at http://localhost:5173
 The frontend wires directly to the backend at `http://127.0.0.1:8000`:
 
 - **IngestPanel** — file picker + `POST /upload_pdf`, displays chunks stored
-- **ChatPanel** — message input ready for `POST /ask_question` wiring
+- **ChatPanel** — ask questions via `POST /ask_question`, displays generated answers with collapsible source references
 
 ## Key Endpoints
 
@@ -78,7 +79,7 @@ The frontend wires directly to the backend at `http://127.0.0.1:8000`:
 | --- | --- | --- |
 | `GET` | `/health` | Health check |
 | `POST` | `/upload_pdf` | Upload a PDF → extracts text → chunks → embeds → stores in Chroma |
-| `POST` | `/ask_question` | Query Chroma for relevant chunks matching a natural-language question |
+| `POST` | `/ask_question` | Ask a natural-language question — returns a generated answer + source chunks |
 | `POST` | `/chat` | LangGraph agent chat (scaffold) |
 
 ## Environment Variables

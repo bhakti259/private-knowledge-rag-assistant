@@ -11,14 +11,14 @@ interface Chunk {
 
 interface AskResponse {
   query: string;
+  answer: string;
   results: Chunk[];
 }
 
 interface Message {
   text: string;
   user: boolean;
-  source?: string;
-  score?: number;
+  sources?: { text: string; source: string; score: number }[];
 }
 
 const ChatPanel: React.FC = () => {
@@ -39,22 +39,17 @@ const ChatPanel: React.FC = () => {
     setLoading(true);
     try {
       const res = await API.post<AskResponse>("/ask_question", { query, top_k: 4 });
-      const results = res.data.results;
-      if (results.length === 0) {
-        setMessages(prev => [...prev, {
-          text: "No relevant content found. Try uploading more documents first.",
-          user: false,
-        }]);
-      } else {
-        results.slice(0, 3).forEach(r => {
-          setMessages(prev => [...prev, {
-            text: r.text,
-            user: false,
-            source: r.source.split(/[/\\]/).pop(),
-            score: r.score,
-          }]);
-        });
-      }
+      const { answer, results } = res.data;
+      const sources = results.slice(0, 3).map(r => ({
+        text: r.text,
+        source: r.source.split(/[/\\]/).pop() ?? r.source,
+        score: r.score,
+      }));
+      setMessages(prev => [...prev, {
+        text: answer,
+        user: false,
+        sources: sources.length > 0 ? sources : undefined,
+      }]);
     } catch (err: any) {
       const detail = err?.response?.data?.detail ?? "Request failed. Is the backend running?";
       setMessages(prev => [...prev, { text: `⚠️ ${detail}`, user: false }]);
@@ -83,10 +78,20 @@ const ChatPanel: React.FC = () => {
           <div key={i} className={`bubble-wrap ${msg.user ? "user" : "ai"}`}>
             <div className="bubble">
               {msg.text}
-              {!msg.user && msg.source && (
-                <span className="source-tag">
-                  📁 {msg.source} · score {msg.score?.toFixed(2)}
-                </span>
+              {!msg.user && msg.sources && msg.sources.length > 0 && (
+                <details className="source-refs">
+                  <summary className="source-refs-toggle">
+                    Sources ({msg.sources.length})
+                  </summary>
+                  {msg.sources.map((s, j) => (
+                    <div key={j} className="source-ref-item">
+                      <span className="source-ref-text">{s.text.slice(0, 150)}…</span>
+                      <span className="source-tag">
+                        {s.source} · score {s.score.toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </details>
               )}
             </div>
           </div>

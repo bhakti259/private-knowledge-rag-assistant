@@ -15,6 +15,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from rag_pipeline.retriever import retrieve_answer
+from rag_pipeline.chain import generate_answer
 
 router = APIRouter()
 
@@ -44,6 +45,7 @@ class AskResponse(BaseModel):
     """Retrieval result returned to the client."""
 
     query: str
+    answer: str = Field(..., description="Generated natural-language answer.")
     results: list[RetrievedChunk]
 
 
@@ -104,6 +106,23 @@ async def ask_question(payload: AskRequest) -> AskResponse:
         for item in raw_results
     ]
 
-    # Step 4: Return the structured response with the original query attached
-    #         so clients don't need to echo it back themselves.
-    return AskResponse(query=payload.query, results=chunks)
+    # Step 4: Generate a synthesized answer from the retrieved chunks.
+    try:
+        answer = await asyncio.to_thread(
+            generate_answer,
+            payload.query,
+            raw_results,
+        )
+    except EnvironmentError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        ) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Answer generation failed: {exc}",
+        ) from exc
+
+    # Step 5: Return the structured response with the generated answer.
+    return AskResponse(query=payload.query, answer=answer, results=chunks)

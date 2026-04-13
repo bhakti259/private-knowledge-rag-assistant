@@ -240,6 +240,34 @@ input[type="text"]:disabled { opacity: 0.5; }
   padding-top: 0.3rem;
 }
 
+/* ── Source references (collapsible) ───────────────────────────── */
+.source-refs {
+  margin-top: 0.6rem;
+  border-top: 1px solid rgba(120, 140, 255, 0.14);
+  padding-top: 0.4rem;
+}
+.source-refs-toggle {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  padding: 0.15rem 0;
+}
+.source-refs-toggle:hover { color: #a0b4ff; }
+.source-ref-item {
+  margin-top: 0.45rem;
+  padding: 0.45rem 0.6rem;
+  background: rgba(10, 14, 33, 0.55);
+  border-radius: 6px;
+  border: 1px solid rgba(120, 140, 255, 0.1);
+}
+.source-ref-text {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
 .chat-input-row { display: flex; gap: 0.5rem; }
 
 /* ── Typing indicator ───────────────────────────────────────────── */
