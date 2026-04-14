@@ -73,6 +73,58 @@ The frontend wires directly to the backend at `http://127.0.0.1:8000`:
 - **IngestPanel** — file picker + `POST /upload_pdf`, displays chunks stored
 - **ChatPanel** — ask questions via `POST /ask_question`, displays generated answers with collapsible source references
 
+## Architecture Flow
+
+### Upload Flow
+
+```
+User selects PDF
+     |
+IngestPanel (React)
+     |  POST /upload_pdf (multipart)
+     v
+upload.py ─── validate (name, extension, MIME)
+     |
+     ├──> _write_upload_to_disk()  ──>  backend/uploads/
+     |
+     ├──> loaders.py:extract_text_from_pdf()
+     |         └──> PyPDF2  ──>  raw text string
+     |
+     ├──> chunking.py:chunk_text(600 chars, 80 overlap)
+     |         └──> list of text chunks
+     |
+     └──> chroma_client.py:store_embeddings()
+               ├──> OpenAI API (text-embedding-3-small)  ──>  1536-dim vectors
+               └──> ChromaDB.add_texts()  ──>  persisted to disk
+
+Response: { file_path, chunks_stored }
+```
+
+### Query Flow
+
+```
+User types question + Enter
+     |
+ChatPanel (React)
+     |  POST /ask_question { query, top_k: 4 }
+     v
+ask.py ─── validate query
+     |
+     ├──> retriever.py:retrieve_answer()
+     |         ├──> OpenAI API  ──>  embed query into vector
+     |         └──> ChromaDB.similarity_search()  ──>  top 4 chunks + scores
+     |
+     └──> chain.py:generate_answer()
+               ├──> build_rag_prompt()  ──>  format context + question
+               └──> ChatOpenAI (gpt-4o-mini)  ──>  synthesized answer
+
+Response: { query, answer, results: [chunks with scores] }
+     |
+ChatPanel renders:
+     ├──> AI bubble with generated answer
+     └──> Collapsible "Sources (3)" with chunk previews + scores
+```
+
 ## Key Endpoints
 
 | Method | Path | Description |
